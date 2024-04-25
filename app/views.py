@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from .models import Employee
 from .serializers import EmployeeSerializer,UserSerializer
 from django.contrib.auth.models import User
@@ -23,7 +23,33 @@ def employeeListView(request):
         else:
             return JsonResponse(serializer.errors, safe=False)
         
+@csrf_exempt
+def employeeDetailView(request, pk):
+    try:
+        employee=Employee.objects.get(pk=pk)
+        
+    except Employee.DoesNotExist:
+        return HttpResponse(status=404)
 
+
+
+    if request.method=='DELETE':
+        employee.delete()
+        return JsonResponse({"message":"delete success"})
+
+    elif request.method=='GET':
+        serializer=EmployeeSerializer(employee)
+        return JsonResponse(serializer.data,safe=False)
+
+    elif request.method=='PUT':
+        jsonData=JSONParser().parse(request)
+        serializer=EmployeeSerializer(employee,data=jsonData)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, safe=False)
+        else:
+            return JsonResponse(serializer.errors, safe=False)
+   
 
 def userListView(request):
     user=User.objects.all()
