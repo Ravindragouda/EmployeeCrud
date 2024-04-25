@@ -50,8 +50,8 @@ def employeeDetailView(request, pk):
         else:
             return Response(serializer.errors)
    
-
+@api_view(['GET'])
 def userListView(request):
     user=User.objects.all()
     serial=UserSerializer(user, many=True)
-    return JsonResponse(serial.data, safe=False)
+    return Response(serial.data)
